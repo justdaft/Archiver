@@ -1,9 +1,10 @@
 ﻿
-# Created on:   18/09/2012 13:46
+# Created on:   18/09/2012
 # Created by:   billyw01
 # Filename:     archiver
 
 cls
+
 $Global:VerbosePreference = 'continue'
 $Global:DebugPreference = 'continue'
 
@@ -16,11 +17,10 @@ Add-Type -assemblyName WindowsBase
 $ScriptPath = (Split-Path ((Get-Variable MyInvocation).Value).MyCommand.Path)
 $GlobalVariables = $ScriptPath + "\GlobalVariables.ps1"
 
-
 [Windows.Input.InputEventHandler]{ $Global:Window.UpdateLayout() }
 
-
-Function Calculate-MD5 {
+Function Calculate-MD5 
+{
     Param([Parameter(Mandatory = $True,
         ValueFromPipeLine = $True,
         Position = 0)]
@@ -43,38 +43,29 @@ Function Calculate-MD5 {
     write-debug "Hash for $filename is $($HASH) "
 }
 
-function reset($source='C:\gatewayTest\logs\', $destination='c:\gatewayTest\LatestArchive\'){
-    push-location $source
-    
-    $random = Get-Random  -Maximum 99999999 -Minimum 11111111
-    gci | Where-Object {$_.Name -match "ArchiveAudit\d{1,8}"} | rename-item -NewName .\ArchiveAudit$random.log
-    gci | Where-Object {$_.Name -match "ArchiveIsdSyncAudit\d{1,8}"} | rename-item -NewName .\ArchiveIsdSyncAudit$random.log
-    gci $source  *.log | copy-Item  -Destination $destination
-    
-    Pop-Location
+function New-archive 
+{
+    param (
+        [string]$directoryName,
+        [string]$logName,
+        [string]$logSize,
+        [string]$logLastWriteTime,
+        [string]$archiver,
+        [string]$date
+    )
+
+    New-Object PSObject -Property @{
+        Directory = $directoryName
+        Name = $logName
+        Size = $logSize
+        LastWrite = $logLastWriteTime
+        Archiver = $archiver
+        Date = $Date
+    }
 } #end function
 
-function New-archive {
-param (
-[string]$directoryName,
-[string]$logName,
-[string]$logSize,
-[string]$logLastWriteTime,
-[string]$archiver,
-[string]$date
-)
-
-New-Object PSObject -Property @{
-    Directory = $directoryName
-    Name = $logName
-    Size = $logSize
-    LastWrite = $logLastWriteTime
-    Archiver = $archiver
-    Date = $Date
-}
-} #end function
-
-function Copy-Archive {
+function Copy-Archive 
+{
 	[CmdletBinding()]
 	param(
 		[Parameter(Position=0, Mandatory=$true)]
@@ -107,7 +98,8 @@ function Copy-Archive {
 	}
 } #end function
 
-function Get-ArchiveName {
+function Get-ArchiveName
+{
 	[CmdletBinding()]
 	param(
 		[Parameter(Position=0, Mandatory=$true)]
@@ -123,8 +115,8 @@ function Get-ArchiveName {
 }
 } #end function
 
-
-function updateStats (){
+function Update-Stats ()
+{
     $listboxOnSiteStats.Items.Clear()
     $listboxOffSiteStats.Items.Clear()
     $onSiteFolderCount = (gci $onSiteStorage  | ? { $_.psiscontainer } ).count
@@ -137,29 +129,25 @@ function updateStats (){
     $listboxOffSiteStats.Items.Add("number of files: $offSiteFileCount") 
 } #end function
 
-
-
-function upDatelist0ffSite ()
+function Upate-List0ffSite ()
 {
     [array]$listOffSite = gci $offSiteStorage | select -ExpandProperty name
     $listboxOffSite.ItemsSource = $listOffSite
 } #end function
 
-
-function upDatelist0nSite ()
+function Update-List0nSite ()
 {
     [array]$listOnSite = gci $onSiteStorage | select -ExpandProperty name
     $listboxOnSite.ItemsSource = $listOnSite
 } #end function
 
-
-function upDatelistLocal ()
+function Update-ListLocal ()
 {
     [array]$list = gci $latestLogs | select -ExpandProperty name
     $listboxLocal.ItemsSource = $list
 } #end function
 
-function upDatelist ($listBox,$dirPath)
+function Update-List ($listBox,$dirPath)
 {
     [array]$list = gci $dirPath | select -ExpandProperty name
     $listBox.ItemsSource = $list
@@ -167,26 +155,25 @@ function upDatelist ($listBox,$dirPath)
 
 
 #region Setup
-reset
-$GLOBAL:list = ""
-. $GlobalVariables
-
-
-Write-Debug "GLOBAL:user $GLOBAL:user "
-Write-Debug "GLOBAL:onSiteStorage $GLOBAL:onSiteStorage"
-Write-Debug "GLOBAL:offSiteStorage $GLOBAL:offSiteStorage"
-Write-Debug "GLOBAL:latestLogs $GLOBAL:latestLogs"
-Write-Debug "GLOBAL:smtpServer $GLOBAL:smtpServer "
-Write-Debug "GLOBAL:emailFrom $GLOBAL:emailFrom"
-Write-Debug "GLOBAL:emailSubject $GLOBAL:emailSubject"
-Write-Debug "GLOBAL:sendEmail $GLOBAL:sendEmail"
-Write-Debug "GLOBAL:SendAttachment $GLOBAL:SendAttachment"
-Write-Debug "GLOBAL:excelFile $GLOBAL:excelFile"
-
+    Set-Location $ScriptPath
+    $GLOBAL:list = ""
+    Write-Debug "GLOBAL Variables, start"
+    . $GlobalVariables
+    Write-Debug "`t GLOBAL:user $GLOBAL:user "
+    Write-Debug "`t GLOBAL:onSiteStorage $GLOBAL:onSiteStorage"
+    Write-Debug "`t GLOBAL:offSiteStorage $GLOBAL:offSiteStorage"
+    Write-Debug "`t GLOBAL:latestLogs $GLOBAL:latestLogs"
+    Write-Debug "`t GLOBAL:smtpServer $GLOBAL:smtpServer "
+    Write-Debug "`t GLOBAL:emailFrom $GLOBAL:emailFrom"
+    Write-Debug "`t GLOBAL:emailSubject $GLOBAL:emailSubject"
+    Write-Debug "`t GLOBAL:sendEmail $GLOBAL:sendEmail"
+    Write-Debug "`t GLOBAL:SendAttachment $GLOBAL:SendAttachment"
+    Write-Debug "`t GLOBAL:excelFile $GLOBAL:excelFile"
+    Write-Debug "GLOBAL Variables, end `r`n"
 #endregion
 
 #region xaml
-    [XML]$xaml=gc "C:\Dropbox\Repositories\archiver\archiver\MainWindow.xaml"
+    [XML]$xaml=gc ".\MainWindow.xaml"
 #endregion
 
 #region FindName
@@ -230,15 +217,11 @@ $GLOBAL:Window.Add_Loaded({
     set-location $latestLogs
     $labelUser.content = $user
 
-    upDatelistLocal
-    upDatelist0ffSite
-    upDatelist0nSite
-    updateStats
-
-
+    Update-ListLocal
+    Upate-List0ffSite
+    Update-List0nSite
+    Update-Stats
     $buttonViewExcel.IsEnabled = $false
-
-
     ##Configure a timer to refresh window##
     #Create Timer object
     Write-Verbose "Creating timer object"
@@ -259,8 +242,6 @@ $GLOBAL:Window.Add_Loaded({
     If (-NOT $timer.IsEnabled) {
         $Window.Close()
     }
-    
-
 })   
 
 $buttonCreateArchive.add_click({
@@ -296,7 +277,7 @@ $buttonCreateArchive.add_click({
 
     Write-Debug "copy archive to onsite storage " 
     Copy-Archive -source $latestLogs -destination $onSiteStorage -name $folderName
-    upDatelist0nSite
+    Update-List0nSite
 
     $onsiteArchive.content = "Added $folderName"
        if (test-path $onSiteStorage$folderName){
@@ -308,7 +289,7 @@ $buttonCreateArchive.add_click({
 
     Write-Debug "copy archive to offsite storage "  
     Copy-Archive -source $latestLogs -destination $oFFSiteStorage -name $folderName
-    upDatelist0ffSite
+    Upate-List0ffSite
 
     $offsiteArchive.content = "Added $folderName"
        if (test-path $offSiteStorage$folderName){
@@ -321,7 +302,7 @@ $buttonCreateArchive.add_click({
     Write-Debug "Cleaning up $latestLogs"
 	Set-Location $latestLogs
     Remove-Item *.log 
-    upDatelistLocal
+    Update-ListLocal
     if (!$(test-path $latestLogs$folderName)){
 	    $lbItem5.content = "5: REMOVE ORIGINAL LOGS                  DONE"
 		$lbItem5.Background="#FF00FF00"
@@ -334,8 +315,6 @@ $buttonCreateArchive.add_click({
 		    $list += "`n"
 		    $list += "`t`t$file"
 			}
-
-
     
 	if( $GLOBAL:sendEmail){
 		Write-Debug "Sending Email"
@@ -360,10 +339,7 @@ $buttonCreateArchive.add_click({
 
               # If the message succeeded, exit the loop
               if($success) { break; }
-        }
-
- 
-    	
+        }   	
 	}
 	else
 	{
@@ -394,7 +370,6 @@ $buttonCreateArchive.add_click({
     $R = $RowCount
     $inc = $R + 1
 
-
     foreach ($item in $archive)
         {
             $currentSheet.cells.Item($inc,1) = $item.Directory
@@ -418,9 +393,7 @@ $buttonCreateArchive.add_click({
 	$lbItem7.content = "7: UPDATE EXCEL REPORT                     DONE"
 	$lbItem7.Background="#FF00FF00"
 
-
-updateStats
-
+    Update-Stats
 
     $buttonCreateArchive.IsEnabled = $false
     $buttonViewExcel.IsEnabled = $True
@@ -431,24 +404,22 @@ $buttonViewExcel.add_click({
 			ii "C:\gatewayTest\ArchiveReport\ArchiveDetails.xlsx"
 	})
 
-
 $GLOBAL:listboxOffSite.add_SelectionChanged({
         write-debug $GLOBAL:listboxOffsite.SelectedValue
         $searchPath = $offSiteStorage+$GLOBAL:listboxOffsite.SelectedValue
-        updatelist -listBox $GLOBAL:listboxOffsiteFiles -dirPath $searchPath
+        Update-List -listBox $GLOBAL:listboxOffsiteFiles -dirPath $searchPath
         $Global:Window.Dispatcher.Invoke( "Render", [Windows.Input.InputEventHandler]{ $Global:Window.UpdateLayout() }, $null, $null)
     })
 
 $GLOBAL:listboxOnSite.add_SelectionChanged({
         write-debug $GLOBAL:listboxOnSite.SelectedValue
         $searchPath = $onSiteStorage+$GLOBAL:listboxOnSite.SelectedValue
-        updatelist -listBox $GLOBAL:listboxOnSiteFiles -dirPath $searchPath
+        Update-List -listBox $GLOBAL:listboxOnSiteFiles -dirPath $searchPath
         $Global:Window.Dispatcher.Invoke( "Render", [Windows.Input.InputEventHandler]{ $Global:Window.UpdateLayout() }, $null, $null)
     })
 
 #Window Events
 $Global:Window.Add_Closed({
-
 
     $timer.Stop() 
 })
