@@ -10,7 +10,9 @@ This project is currently on going so please excuse the roughness of it all.
 
 The scripts and UI are all fully working but I still have a few things on my todo list for it.
  
-![ScreenShot](https://github.com/justdaft/Archiver/raw/master/ScreenShots/mainwindow.PNG)
+ Here is a screenshot of the UI.
+ 
+ ![ScreenShot](https://github.com/justdaft/Archiver/raw/master/ScreenShots/mainwindow.PNG)
 
 Stay tuned for more in the coming days.
 
