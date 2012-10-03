@@ -2,4 +2,4 @@
 
 ## PowerShell, WPF and XAML
 
-![Alt ScreenShot of MainWindow](/mainwindow.png "Main Window")
+![Alt ScreenShot of MainWindow](/screenshots/mainwindow.png "Main Window")
