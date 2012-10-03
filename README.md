@@ -11,9 +11,9 @@ This project is currently on going so please excuse the roughness of it all.
 The scripts and UI are all fully working but I still have a few things on my todo list for it.
 
 This is a screenshot of the main window.
-![Alt ScreenShot of MainWindow](http://github.com/justdaft/Archiver/screenshots/mainwindow.png "Main Window")
+![Alt ScreenShot of MainWindow](https://github.com/justdaft/Archiver/blob/master/ScreenShots/mainwindow.PNG "Main Window")
 
-
+https://github.com/justdaft/Archiver/blob/master/ScreenShots/mainwindow.PNG
 
 Stay tuned for more in the coming days.
 
