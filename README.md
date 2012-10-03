@@ -13,4 +13,6 @@ The scripts and UI are all fully working but I still have a few things on my tod
 This is a screenshot of the main window.
 ![Alt ScreenShot of MainWindow](/mainwindow.png "Main Window")
 
-Stay tuned for more in the coming days
+Stay tuned for more in the coming days.
+
+Billy
