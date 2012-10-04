@@ -5,6 +5,8 @@
 
 cls
 
+Reset-Enviroment
+
 $Global:VerbosePreference = 'continue'
 $Global:DebugPreference = 'continue'
 
@@ -248,6 +250,8 @@ $buttonCreateArchive.add_click({
     Set-Location $latestLogs
     $listboxOnSite.ItemsSource = $null
     $textblockStatus.Text = "Running"
+    $fileList = GCI $latestLogs
+
 
     Write-Debug "Getting Archive Folder name "
     $textblockStatus.Text = "Getting Archive Folder name"    		
@@ -311,11 +315,25 @@ $buttonCreateArchive.add_click({
     }
 
     Write-Debug "Creating Email"
+
+    $GLOBAL:arclist = ""
+
     foreach ($file in $fileList) {
-		    $list += "`n"
-		    $list += "`t`t$file"
+		    #$arclist += "`n"
+		    $arclist += "`t$file`r`n"
 			}
-    
+
+    $emailBody = @"
+    $emailHeader
+
+    Archive Name: $folderName
+
+    Files: $arclist
+
+    $emailFooter
+"@
+
+ 
 	if( $GLOBAL:sendEmail){
 		Write-Debug "Sending Email"
 
