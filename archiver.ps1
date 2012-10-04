@@ -28,7 +28,7 @@ Function Calculate-MD5
         Position = 0)]
         [String]$Filename
     )
-
+    # Must include full path to file
     $MD5 = New-Object System.Security.Cryptography.MD5CryptoServiceProvider
     If([System.IO.File]::Exists($FileName)) {
         write-debug "Hashing $filename"
@@ -43,26 +43,29 @@ Function Calculate-MD5
         $HASH = "ERROR: $FileName Not Found"
     }
     write-debug "Hash for $filename is $($HASH) "
+    return $hash
 }
 
 function New-archive 
 {
     param (
-        [string]$directoryName,
+        [string]$directory,        
         [string]$logName,
         [string]$logSize,
         [string]$logLastWriteTime,
         [string]$archiver,
-        [string]$date
+        [string]$date,
+        [string]$md5Hash
     )
 
     New-Object PSObject -Property @{
-        Directory = $directoryName
+        Directory = $directory
         Name = $logName
         Size = $logSize
         LastWrite = $logLastWriteTime
         Archiver = $archiver
         Date = $Date
+        MD5Hash = $md5Hash
     }
 } #end function
 
@@ -268,10 +271,14 @@ $buttonCreateArchive.add_click({
     $Global:Window.Dispatcher.Invoke( "Render", [Windows.Input.InputEventHandler]{ $Global:Window.UpdateLayout() }, $null, $null)
     Start-Sleep 1
 	
-	Write-Debug "New Archive Created $folderName" 
+	
+
+    Write-Debug "New Archive Created $folderName" 
     $archive = @()
-    $all =  gci   |  select name,length,LastWriteTime
-    $all |%{ $archive += New-archive -directoryName $folderName -logname $_.name -logSize $_.length -logLastWriteTime $_.lastwritetime -archiver $user -date $Date }    
+    $all =  gci   |  select name,length,LastWriteTime,@{Name="MD5Hash";Expression={ $(Calculate-MD5 $_.fullname)}}
+    $all |%{ $archive += New-archive -directoryName $folderName -logname $_.name -logSize $_.length -logLastWriteTime $_.lastwritetime -archiver $user -date $Date -md5Hash $_.MD5Hash}   
+    
+    
     
     #$FileSource = gci $latestLogs 
 	$lbItem2.content = "2: COPY TO ONSITE STORAGE               DONE"
@@ -395,7 +402,8 @@ $buttonCreateArchive.add_click({
             $currentSheet.cells.Item($inc,3) = $item.Name 
             $currentSheet.cells.Item($inc,4) = $item.Size 
             $currentSheet.cells.Item($inc,5) = $item.Archiver 
-            $currentSheet.cells.Item($inc,6) = $item.Date 
+            $currentSheet.cells.Item($inc,6) = $item.Date
+            $currentSheet.cells.Item($inc,7) = $item.MD5Hash
             $inc ++
         }
     $wb.Save() 
