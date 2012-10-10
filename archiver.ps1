@@ -4,6 +4,7 @@
 # Filename:     archiver
 #
 # edit: 10102012 fixed directory name not being used in excel
+# edit: 10102012 added copy-spreadsheet function
 
 cls
 
@@ -22,6 +23,28 @@ $ScriptPath = (Split-Path ((Get-Variable MyInvocation).Value).MyCommand.Path)
 $GlobalVariables = $ScriptPath + "\GlobalVariables.ps1"
 
 [Windows.Input.InputEventHandler]{ $Global:Window.UpdateLayout() }
+
+function Copy-SpreadSheet($fileName,$sourceLocation=$pwd.Path,$destiantionLocation,[switch]$backup)
+{   
+    # example  Copy-SpreadSheet -fileName hello.txt -sourceLocation C:\gatewayTest\LatestArchive\  -destiantionLocation C:\gatewayTest\LatestArchive\new\ -backup
+
+    push-location $sourceLocation
+    Write-Debug $sourceLocation
+
+    if($backup){
+        Write-Debug "backup old file"
+        push-location $destiantionLocation
+        Write-Debug $destiantionLocation$fileName
+        if(Test-Path "$destiantionLocation$("backup_"+$fileName)"){
+            Write-Debug "removing old backup $("$destiantionLocation$("backup_"+$fileName)")"
+            Remove-Item $destiantionLocation$("backup_"+$fileName)
+        }
+        Rename-Item $destiantionLocation$fileName  $destiantionLocation$("backup_"+$fileName) -Force
+        Pop-Location
+    }
+    copy-item $fileName $destiantionLocation$fileName
+    Pop-Location 
+}
 
 Function Calculate-MD5 
 {
@@ -274,14 +297,12 @@ $buttonCreateArchive.add_click({
     Start-Sleep 1
 	
 	
-
     Write-Debug "New Archive Created $folderName" 
     $archive = @()
     $all =  gci   |  select name,length,LastWriteTime,@{Name="MD5Hash";Expression={ $(Calculate-MD5 $_.fullname)}}
     $all |%{ $archive += New-archive -directory $folderName -logname $_.name -logSize $_.length -logLastWriteTime $_.lastwritetime -archiver $user -date $Date -md5Hash $_.MD5Hash}   
     
-   write-host $archive
-    
+
     #$FileSource = gci $latestLogs 
 	$lbItem2.content = "2: COPY TO ONSITE STORAGE               DONE"
 	$lbItem2.Background="#FF00FF00"
@@ -411,6 +432,14 @@ $buttonCreateArchive.add_click({
     $wb.Save() 
     $xl.quit()
 
+    $onsiteReport = $onSiteStorage+"ArchiveReport\"
+    Write-Debug "copying spreadsheet to $onsiteReport"
+    Copy-SpreadSheet -fileName ArchiveDetails.xlsx -sourceLocation C:\gatewayTest\ArchiveReport\  -destiantionLocation $onsiteReport -backup
+
+    
+    $offsiteReport = $offSiteStorage+"ArchiveReport\"
+    Write-Debug "copying spreadsheet to $offsiteReport"
+    Copy-SpreadSheet -fileName ArchiveDetails.xlsx -sourceLocation C:\gatewayTest\ArchiveReport\  -destiantionLocation $offsiteReport -backup
 
 	#if any processes left, kill them
 	
