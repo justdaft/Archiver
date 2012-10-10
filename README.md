@@ -18,4 +18,4 @@ Stay tuned for more in the coming days.
 
 Billy
 
- [You can check out my blog here](www.justdaft.com).
+ [You can check out my blog here](http://www.justdaft.com).
