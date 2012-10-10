@@ -2,6 +2,8 @@
 # Created on:   18/09/2012
 # Created by:   billyw01
 # Filename:     archiver
+#
+# edit: 10102012 fixed directory name not being used in excel
 
 cls
 
@@ -276,9 +278,9 @@ $buttonCreateArchive.add_click({
     Write-Debug "New Archive Created $folderName" 
     $archive = @()
     $all =  gci   |  select name,length,LastWriteTime,@{Name="MD5Hash";Expression={ $(Calculate-MD5 $_.fullname)}}
-    $all |%{ $archive += New-archive -directoryName $folderName -logname $_.name -logSize $_.length -logLastWriteTime $_.lastwritetime -archiver $user -date $Date -md5Hash $_.MD5Hash}   
+    $all |%{ $archive += New-archive -directory $folderName -logname $_.name -logSize $_.length -logLastWriteTime $_.lastwritetime -archiver $user -date $Date -md5Hash $_.MD5Hash}   
     
-    
+   write-host $archive
     
     #$FileSource = gci $latestLogs 
 	$lbItem2.content = "2: COPY TO ONSITE STORAGE               DONE"
