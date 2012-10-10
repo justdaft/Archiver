@@ -17,3 +17,5 @@ The scripts and UI are all fully working but I still have a few things on my tod
 Stay tuned for more in the coming days.
 
 Billy
+
+ [You can check out my blog here](www.justdaft.com).
