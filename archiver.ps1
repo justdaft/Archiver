@@ -5,10 +5,12 @@
 #
 # edit: 10102012 fixed directory name not being used in excel
 # edit: 10102012 added copy-spreadsheet function
+# edit: 11102012 improved debug messages
 
 cls
 
-Reset-Enviroment
+# this calls and external function that creates some dummy files
+. Reset-Enviroment
 
 $Global:VerbosePreference = 'continue'
 $Global:DebugPreference = 'continue'
