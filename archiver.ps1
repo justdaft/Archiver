@@ -34,7 +34,7 @@ function Copy-SpreadSheet($fileName,$sourceLocation=$pwd.Path,$destiantionLocati
     if($backup){
         Write-Debug "backup old file"
         push-location $destiantionLocation
-        Write-Debug $destiantionLocation$fileName
+        Write-Debug "`$destiantionLocation`$fileName: $destiantionLocation$fileName"
         if(Test-Path "$destiantionLocation$("backup_"+$fileName)"){
             Write-Debug "removing old backup $("$destiantionLocation$("backup_"+$fileName)")"
             Remove-Item $destiantionLocation$("backup_"+$fileName)
@@ -56,7 +56,7 @@ Function Calculate-MD5
     # Must include full path to file
     $MD5 = New-Object System.Security.Cryptography.MD5CryptoServiceProvider
     If([System.IO.File]::Exists($FileName)) {
-        write-debug "Hashing $filename"
+        write-debug "Hashing `$filename: $filename"
         $FileStream = New-Object System.IO.FileStream($FileName,`
         [System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,`
         [System.IO.FileShare]::ReadWrite)
@@ -67,7 +67,7 @@ Function Calculate-MD5
     Else {
         $HASH = "ERROR: $FileName Not Found"
     }
-    write-debug "Hash for $filename is $($HASH) "
+    write-debug "Hash for `$filename: $filename is $($HASH) "
     return $hash
 }
 
@@ -189,16 +189,16 @@ function Update-List ($listBox,$dirPath)
     $GLOBAL:list = ""
     Write-Debug "GLOBAL Variables, start"
     . $GlobalVariables
-    Write-Debug "`t GLOBAL:user $GLOBAL:user "
-    Write-Debug "`t GLOBAL:onSiteStorage $GLOBAL:onSiteStorage"
-    Write-Debug "`t GLOBAL:offSiteStorage $GLOBAL:offSiteStorage"
-    Write-Debug "`t GLOBAL:latestLogs $GLOBAL:latestLogs"
-    Write-Debug "`t GLOBAL:smtpServer $GLOBAL:smtpServer "
-    Write-Debug "`t GLOBAL:emailFrom $GLOBAL:emailFrom"
-    Write-Debug "`t GLOBAL:emailSubject $GLOBAL:emailSubject"
-    Write-Debug "`t GLOBAL:sendEmail $GLOBAL:sendEmail"
-    Write-Debug "`t GLOBAL:SendAttachment $GLOBAL:SendAttachment"
-    Write-Debug "`t GLOBAL:excelFile $GLOBAL:excelFile"
+    Write-Debug "`t `$GLOBAL:user $GLOBAL:user "
+    Write-Debug "`t `$GLOBAL:onSiteStorage $GLOBAL:onSiteStorage"
+    Write-Debug "`t `$GLOBAL:offSiteStorage $GLOBAL:offSiteStorage"
+    Write-Debug "`t `$GLOBAL:latestLogs $GLOBAL:latestLogs"
+    Write-Debug "`t `$GLOBAL:smtpServer $GLOBAL:smtpServer "
+    Write-Debug "`t `$GLOBAL:emailFrom $GLOBAL:emailFrom"
+    Write-Debug "`t `$GLOBAL:emailSubject $GLOBAL:emailSubject"
+    Write-Debug "`t `$GLOBAL:sendEmail $GLOBAL:sendEmail"
+    Write-Debug "`t `$GLOBAL:SendAttachment $GLOBAL:SendAttachment"
+    Write-Debug "`t `$GLOBAL:excelFile $GLOBAL:excelFile"
     Write-Debug "GLOBAL Variables, end `r`n"
 #endregion
 
@@ -254,20 +254,20 @@ $GLOBAL:Window.Add_Loaded({
     $buttonViewExcel.IsEnabled = $false
     ##Configure a timer to refresh window##
     #Create Timer object
-    Write-Verbose "Creating timer object"
+    Write-Debug "Creating timer object"
     $Global:timer = new-object System.Windows.Threading.DispatcherTimer 
     #Fire off every 2 seconds
-    Write-Verbose "Adding 2 second interval to timer object"
+    Write-Debug "Adding 2 second interval to timer object"
     $timer.Interval = [TimeSpan]"0:0:2.00"
     #Add event per tick
-    Write-Verbose "Adding Tick Event to timer object"
+    Write-Debug "Adding Tick Event to timer object"
     $timer.Add_Tick({
         [Windows.Input.InputEventHandler]{ $Global:Window.UpdateLayout() }
         $Global:Window.Dispatcher.Invoke( "Render", [Windows.Input.InputEventHandler]{ $Global:Window.UpdateLayout() }, $null, $null)
         Write-Debug "update layout"
     })
     #Start timer
-    Write-Verbose "Starting Timer"
+    Write-Debug "Starting Timer"
     $timer.Start()
     If (-NOT $timer.IsEnabled) {
         $Window.Close()
@@ -285,7 +285,7 @@ $buttonCreateArchive.add_click({
     $textblockStatus.Text = "Getting Archive Folder name"    		
 	$folderName = Get-ArchiveName -filePath $latestLogs
 
-	Write-Debug "New Archive Folder $folderName"
+	Write-Debug "New Archive Created `$folderName: $folderName"
     $textblockStatus.Text = "New Archive Folder $folderName"  
     $textblockStatus.Text = "New Archive Folder Path $folderName"
 	$newArchiveFolderPath =$latestLogs+$folderName   
@@ -297,7 +297,7 @@ $buttonCreateArchive.add_click({
     Start-Sleep 1
 	
 	
-    Write-Debug "New Archive Created $folderName" 
+    Write-Debug "New Archive Created `$folderName: $folderName" 
     $archive = @()
     $all =  gci   |  select name,length,LastWriteTime,@{Name="MD5Hash";Expression={ $(Calculate-MD5 $_.fullname)}}
     $all |%{ $archive += New-archive -directory $folderName -logname $_.name -logSize $_.length -logLastWriteTime $_.lastwritetime -archiver $user -date $Date -md5Hash $_.MD5Hash}   
@@ -309,7 +309,7 @@ $buttonCreateArchive.add_click({
     $Global:Window.Dispatcher.Invoke( "Render", [Windows.Input.InputEventHandler]{ $Global:Window.UpdateLayout() }, $null, $null)
     Start-Sleep 1
 
-    Write-Debug "copy archive to onsite storage " 
+    Write-Debug "copy `$latestLogs: $latestLogs to `$onSiteStorage: $onSiteStorage" 
     Copy-Archive -source $latestLogs -destination $onSiteStorage -name $folderName
     Update-List0nSite
 
@@ -321,7 +321,7 @@ $buttonCreateArchive.add_click({
         Start-Sleep 1
     }
 
-    Write-Debug "copy archive to offsite storage "  
+    Write-Debug "copy `$latestLogs: $latestLogs to `$offSiteStorage: $offSiteStorage"  
     Copy-Archive -source $latestLogs -destination $oFFSiteStorage -name $folderName
     Upate-List0ffSite
 
@@ -333,7 +333,7 @@ $buttonCreateArchive.add_click({
         Start-Sleep 1
     }
 
-    Write-Debug "Cleaning up $latestLogs"
+    Write-Debug "Cleaning up `$latestLogs: $latestLogs"
 	Set-Location $latestLogs
     Remove-Item *.log 
     Update-ListLocal
@@ -403,7 +403,7 @@ $buttonCreateArchive.add_click({
     Write-Debug "Updateing excel"
     $GLOBAL:xl = New-Object -ComObject Excel.Application 
     $GLOBAL:wb = $xl.Workbooks.Open($excelFile)
-    Write-Debug "objects $GLOBAL:xl and $GLOBAL:wb, created"
+    Write-Debug "objects `$GLOBAL:xl: $GLOBAL:xl and `$GLOBAL:wb: $GLOBAL:wb, created"
         
     #$xl.Visible = $true
 
@@ -433,12 +433,12 @@ $buttonCreateArchive.add_click({
     $xl.quit()
 
     $onsiteReport = $onSiteStorage+"ArchiveReport\"
-    Write-Debug "copying spreadsheet to $onsiteReport"
+    Write-Debug "copying spreadsheet to `$onsiteReport: $onsiteReport"
     Copy-SpreadSheet -fileName ArchiveDetails.xlsx -sourceLocation C:\gatewayTest\ArchiveReport\  -destiantionLocation $onsiteReport -backup
 
     
     $offsiteReport = $offSiteStorage+"ArchiveReport\"
-    Write-Debug "copying spreadsheet to $offsiteReport"
+    Write-Debug "copying spreadsheet to `$offsiteReport: $offsiteReport"
     Copy-SpreadSheet -fileName ArchiveDetails.xlsx -sourceLocation C:\gatewayTest\ArchiveReport\  -destiantionLocation $offsiteReport -backup
 
 	#if any processes left, kill them
@@ -462,14 +462,14 @@ $buttonViewExcel.add_click({
 	})
 
 $GLOBAL:listboxOffSite.add_SelectionChanged({
-        write-debug $GLOBAL:listboxOffsite.SelectedValue
+        write-debug "`$GLOBAL:listboxOffsite.SelectedValue: $GLOBAL:listboxOffsite.SelectedValue"
         $searchPath = $offSiteStorage+$GLOBAL:listboxOffsite.SelectedValue
         Update-List -listBox $GLOBAL:listboxOffsiteFiles -dirPath $searchPath
         $Global:Window.Dispatcher.Invoke( "Render", [Windows.Input.InputEventHandler]{ $Global:Window.UpdateLayout() }, $null, $null)
     })
 
 $GLOBAL:listboxOnSite.add_SelectionChanged({
-        write-debug $GLOBAL:listboxOnSite.SelectedValue
+        write-debug "`$GLOBAL:listboxOnSite.SelectedValue: $GLOBAL:listboxOnSite.SelectedValue"
         $searchPath = $onSiteStorage+$GLOBAL:listboxOnSite.SelectedValue
         Update-List -listBox $GLOBAL:listboxOnSiteFiles -dirPath $searchPath
         $Global:Window.Dispatcher.Invoke( "Render", [Windows.Input.InputEventHandler]{ $Global:Window.UpdateLayout() }, $null, $null)
