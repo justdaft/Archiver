@@ -5,12 +5,11 @@
 #
 # edit: 10102012 fixed directory name not being used in excel
 # edit: 10102012 added copy-spreadsheet function
-# edit: 11102012 improved debug messages
+# edit: 11102012 improved debug messages 
 
 cls
 
-# this calls and external function that creates some dummy files
-. Reset-Enviroment
+set-location "C:\Dropbox\github_repos\Archiver"
 
 $Global:VerbosePreference = 'continue'
 $Global:DebugPreference = 'continue'
@@ -20,16 +19,21 @@ Add-Type -assemblyName PresentationFramework
 Add-Type -assemblyName PresentationCore
 Add-Type -assemblyName WindowsBase
 
+Add-Type -path 'C:\posh_dll_resources\MahApps.Metro.dll'
+#[Reflection.Assembly]::LoadFile("C:\posh_dll_resources\MahApps.Metro.dll")
+#$null = [Reflection.Assembly]::LoadFrom( 'C:\posh_dll_resources\MahApps.Metro.dll' ) 
+
 # Add all global variables.
 $ScriptPath = (Split-Path ((Get-Variable MyInvocation).Value).MyCommand.Path)
 $GlobalVariables = $ScriptPath + "\GlobalVariables.ps1"
+
+# this calls and external function that creates some dummy files
+. Reset-Enviroment
 
 [Windows.Input.InputEventHandler]{ $Global:Window.UpdateLayout() }
 
 function Copy-SpreadSheet($fileName,$sourceLocation=$pwd.Path,$destiantionLocation,[switch]$backup)
 {   
-    # example  Copy-SpreadSheet -fileName hello.txt -sourceLocation C:\gatewayTest\LatestArchive\  -destiantionLocation C:\gatewayTest\LatestArchive\new\ -backup
-
     push-location $sourceLocation
     Write-Debug $sourceLocation
 
@@ -192,6 +196,7 @@ function Update-List ($listBox,$dirPath)
     Write-Debug "GLOBAL Variables, start"
     . $GlobalVariables
     Write-Debug "`t `$GLOBAL:user $GLOBAL:user "
+    Write-Debug "`t `$GLOBAL:PathToXAML $GLOBAL:PathToXAML "
     Write-Debug "`t `$GLOBAL:onSiteStorage $GLOBAL:onSiteStorage"
     Write-Debug "`t `$GLOBAL:offSiteStorage $GLOBAL:offSiteStorage"
     Write-Debug "`t `$GLOBAL:latestLogs $GLOBAL:latestLogs"
@@ -205,7 +210,7 @@ function Update-List ($listBox,$dirPath)
 #endregion
 
 #region xaml
-    [XML]$xaml=gc ".\MainWindow.xaml"
+    [XML]$xaml=gc "$GLOBAL:PathToXAML\MainWindow.xaml"
 #endregion
 
 #region FindName
@@ -233,6 +238,8 @@ function Update-List ($listBox,$dirPath)
 
     $GLOBAL:buttonCreateArchive = $GLOBAL:Window.FindName("buttonCreateArchive")
     $GLOBAL:buttonViewExcel = $GLOBAL:Window.FindName("buttonViewExcel")
+    $GLOBAL:cmdAbout = $GLOBAL:Window.FindName("cmdAbout")
+    $GLOBAL:cmdSettings = $GLOBAL:Window.FindName("cmdSettings")
 
     $GLOBAL:labelUser = $GLOBAL:Window.FindName("labelUser")
     $GLOBAL:onsiteArchive = $GLOBAL:Window.FindName("onsiteArchive")
@@ -458,6 +465,27 @@ $buttonCreateArchive.add_click({
     $buttonViewExcel.IsEnabled = $True
     $updateWindow
 })
+
+$GLOBAL:cmdAbout.add_click({
+    [xml]$aboutWindow = GC "C:\Dropbox\Repositories\archiver\archiver\about.xaml"
+
+    $reader1=(New-Object System.Xml.XmlNodeReader $aboutWindow)
+    $Window1 =[Windows.Markup.XamlReader]::Load( $reader1)
+    $Window1.ShowDialog() | out-null
+    })
+
+$GLOBAL:cmdSettings.add_click({
+
+    [xml]$settingsWindow = GC "C:\Dropbox\Repositories\archiver\archiver\settingsWindow.xaml"  
+
+    $reader2=(New-Object System.Xml.XmlNodeReader $settingsWindow)
+    $Window2 =[Windows.Markup.XamlReader]::Load( $reader2)
+
+    $txtblockSettings = $Window2.FindName("txtblockSettings")
+    $txtblockSettings.text = GC 'C:\Dropbox\github_repos\Archiver\GlobalVariables.ps1'
+
+    $Window2.ShowDialog() | out-null
+    })
 
 $buttonViewExcel.add_click({
 			ii "C:\gatewayTest\ArchiveReport\ArchiveDetails.xlsx"
