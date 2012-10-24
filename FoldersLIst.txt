@@ -1,0 +1,5 @@
+Logs
+OnSiteStorage
+OffSiteStorage
+LatestLogs
+ArchiveDetails
