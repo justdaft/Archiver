@@ -6,6 +6,7 @@
 # edit: 10102012 fixed directory name not being used in excel
 # edit: 10102012 added copy-spreadsheet function
 # edit: 11102012 improved debug messages 
+# edit: 23102012 added reset-enviroment function
 
 cls
 
